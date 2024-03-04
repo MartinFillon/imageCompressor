@@ -12,8 +12,6 @@ on:
 
 env:
   MIRROR_URL: "git@github.com:EpitechPromo2027/B-FUN-400-PAR-4-1-compressor-lou.onezime.git"
-  EXECUTABLE: "imageCompressor"
-  ARGUMENTS: "-n 2 -l 0.8 -f in"
 
 jobs:
   check_stack_build:
