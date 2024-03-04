@@ -17,10 +17,11 @@ $(NAME):
 	cp $(BIN_PATH)/bin/$(NAME)-exe $(NAME)
 
 clean:
+	stack purge $(HCFLAGS)
 	stack clean
 
 fclean: clean
-	rm -f $(NAME)
+	$(RM) $(NAME)
 
 re: fclean all
 

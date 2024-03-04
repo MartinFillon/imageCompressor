@@ -41,7 +41,6 @@ jobs:
             fetch-depth: 0
       - run: sudo make
         timeout-minutes: 5
-      - run: make clean
       - run: |
           OIFS=$IFS
           IFS=' '
