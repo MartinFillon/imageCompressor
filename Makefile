@@ -18,7 +18,6 @@ $(NAME):
 
 clean:
 	stack purge $(HCFLAGS)
-	stack clean
 
 fclean: clean
 	$(RM) $(NAME)
