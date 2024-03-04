@@ -5,13 +5,16 @@
 ## Makefile
 ##
 
+HCFLAGS = --allow-different-user
+
 BIN_PATH = $(shell stack path --local-install-root)
 NAME = imageCompressor
 
 all: $(NAME)
 
 $(NAME):
-	stack build && cp $(BIN_PATH)/bin/$(NAME)-exe $(NAME)
+	$(shell stack build --allow-different-user)
+	cp $(BIN_PATH)/bin/$(NAME)-exe $(NAME)
 
 clean:
 	stack clean
