@@ -7,7 +7,12 @@
 
 module Main (main) where
 
-import Lib
+import Utils
+import Parsing
+
+import System.Environment
 
 main :: IO ()
-main = usage
+main = do
+    args <- getArgs
+    parseArgs args
