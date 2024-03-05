@@ -10,7 +10,7 @@ module Lib (
     pError,
 ) where
 
-import System.Exit
+import System.Exit (ExitCode (ExitFailure), exitWith)
 import System.IO (hPutStrLn, stderr)
 
 pError :: String -> IO ()
