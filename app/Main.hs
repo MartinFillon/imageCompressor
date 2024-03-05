@@ -7,7 +7,10 @@
 
 module Main (main) where
 
-import Lib
+import System.Environment (getArgs)
+
+import Lib (usage)
+import Options (defaultOpt, optParser)
 
 main :: IO ()
-main = usage
+main = usage >> getArgs >>= print . optParser defaultOpt
