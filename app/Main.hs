@@ -9,8 +9,13 @@ module Main (main) where
 
 import System.Environment (getArgs)
 
-import Lib (usage)
-import Options (defaultOpt, optParser)
+import Options (Opt (..), defaultOpt, optParser)
+
+import File (openFile)
+
+printFileContent :: Maybe Opt -> IO ()
+printFileContent Nothing = return ()
+printFileContent (Just (Opt r _ _)) = openFile r >>= putStr
 
 main :: IO ()
-main = usage >> getArgs >>= print . optParser defaultOpt
+main = getArgs >>= printFileContent . optParser defaultOpt

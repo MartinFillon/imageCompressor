@@ -41,6 +41,7 @@ library
 executable imageCompressor-exe
   main-is: Main.hs
   other-modules:
+      File
       Paths_imageCompressor
   autogen-modules:
       Paths_imageCompressor
