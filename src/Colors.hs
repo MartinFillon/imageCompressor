@@ -5,7 +5,7 @@
 -- Main
 -}
 
-module Colors (Color (..)) where
+module Colors (Color (..), colorFrom) where
 
 import Data.Word (Word8)
 
