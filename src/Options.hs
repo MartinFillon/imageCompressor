@@ -28,6 +28,6 @@ defaultOpt = Opt Nothing Nothing Nothing
 optParser :: Opt -> [String] -> Maybe Opt
 optParser o [] = Just o
 optParser o ("-l" : x : xs) = optParser (o {limit = readMaybe x}) xs
-optParser o ("-N" : x : xs) = optParser (o {colors = readMaybe x}) xs
+optParser o ("-n" : x : xs) = optParser (o {colors = readMaybe x}) xs
 optParser o ("-f" : x : xs) = optParser (o {path = Just x}) xs
 optParser _ _ = Nothing
