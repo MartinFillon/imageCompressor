@@ -5,7 +5,7 @@
 -- Main
 -}
 
-module Points (Point (..)) where
+module Points (Point (..), pointFrom) where
 
 data Point = Point
     { x :: Int,
@@ -15,6 +15,3 @@ data Point = Point
 
 pointFrom :: (Int, Int) -> Point
 pointFrom (cx, cy) = Point cx cy
-
-instance Read Point where
-    readsPrec _ str = (\xs -> [(pointFrom xs, "")]) (read str :: (Int, Int))
