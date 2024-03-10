@@ -5,10 +5,11 @@
 -- Main
 -}
 
-module Calculator (appendToArr) where
+module Calculator (appendToArr, kMeans, generateArrs) where
 
-import Colors (Color, distance)
+import Colors (Color (Color), distance)
 import Data.List
+import Data.Word (Word8)
 
 appendAtIdx' :: a -> [[a]] -> Int -> [[a]]
 appendAtIdx' _ [] _ = []
@@ -27,3 +28,11 @@ appendToArr means color cls =
         (elemIndex (foldl1 min m) m)
   where
     m = map (\x -> distance x color) means
+
+generateArrs :: Int -> [[Color]]
+generateArrs 0 = []
+generateArrs x = [] : generateArrs (x - 1)
+
+kMeans :: [Color] -> Int -> Float -> [Color] -> [[Color]]
+kMeans [] n _ _ = generateArrs n
+kMeans (x : xs) n l cls = appendToArr cls x (kMeans xs n l cls)
