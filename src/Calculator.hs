@@ -27,7 +27,7 @@ appendToArr means color cls =
         cls
         (elemIndex (foldl1 min m) m)
   where
-    m = map (\x -> distance x color) means
+    m = map (`distance` color) means
 
 generateArrs :: Int -> [[Color]]
 generateArrs 0 = []

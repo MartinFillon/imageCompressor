@@ -28,4 +28,6 @@ distance' :: Word8 -> Word8 -> Float
 distance' x y = fromIntegral ((x - y) ^ 2) :: Float
 
 distance :: Color -> Color -> Float
-distance (Color xr xg xb) (Color yr yg yb) = sqrt (distance' yr xr + distance' yg xg + distance' yb xb)
+distance (Color xr xg xb) (Color yr yg yb) = sqrt dist
+  where
+    dist = distance' yr xr + distance' yg xg + distance' yb xb
