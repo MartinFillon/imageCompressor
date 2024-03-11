@@ -10,6 +10,7 @@ module Calculator (appendToArr, kMeans, getMean) where
 import Colors (Color (Color), colorFrom, distance)
 import Data.List (elemIndex, genericLength)
 import Data.Word (Word8)
+import Debug.Trace
 
 appendAtIdx' :: a -> [[a]] -> Int -> [[a]]
 appendAtIdx' _ [] _ = []
@@ -30,11 +31,12 @@ appendToArr meansl color cls =
     m = map (`distance` color) meansl
 
 kMeans :: Int -> [Color] -> [Color] -> [[Color]]
-kMeans n [] _ =  replicate n []
+kMeans _ [] x = map (: []) x
 kMeans n (x : xs) cls = appendToArr cls x (kMeans n xs cls)
 
 mean :: [Word8] -> Word8
-mean x = sum x `div` genericLength x
+mean [] = 0
+mean x = sum x `div` traceShow (genericLength x) (genericLength x)
 
 means :: ([Word8], [Word8], [Word8]) -> (Word8, Word8, Word8)
 means (a, b, c) = (mean a, mean b, mean c)

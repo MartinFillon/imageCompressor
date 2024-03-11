@@ -10,19 +10,22 @@ module Main (main) where
 import System.Environment (getArgs)
 
 import Calculator (getMean, kMeans)
-import Colors (Color (Color), distance)
+import Colors (Color (Color, g), distance)
+import Debug.Trace (traceShow)
 import File (openFile, parseFile)
 import Options (Opt (..), defaultOpt, optParser)
 import Points (Point)
 import System.Exit (ExitCode (ExitFailure), exitWith)
-import System.Random (randomIO)
+import System.Random (randomIO, randomRIO)
 
 printFileContent :: Maybe Opt -> IO ()
 printFileContent (Just (Opt r (Just n) (Just c))) = do
     file <- openFile r
-    arrs <- generateRandArrs n
+    let f = parseFile file
+    fl <- check f
+    arrs <- generateArr n (splitIt fl)
     print (map getMean arrs)
-    print $ run n c file arrs
+    print $ tryRun n c arrs (splitIt fl)
     return ()
 printFileContent _ = exitWith $ ExitFailure 84
 
@@ -30,31 +33,35 @@ splitIt :: [(Point, Color)] -> [Color]
 splitIt [] = []
 splitIt ((_, c) : xs) = c : splitIt xs
 
-tryRun :: Int -> Float -> [[Color]] -> Either String [(Point, Color)] -> [[Color]]
-tryRun _ _ _ (Left _) = []
-tryRun n k st (Right l) = calculate n (splitIt l) st k
+check :: Either String a -> IO a
+check (Left _) = exitWith $ ExitFailure 84
+check (Right a) = return a
+
+tryRun :: Int -> Float -> [[Color]] -> [Color] -> [[Color]]
+tryRun n k st l = calculate n l st k
 
 calculate :: Int -> [Color] -> [[Color]] -> Float -> [[Color]]
 calculate n l ra k
-    | compareMeans (map getMean new) (map getMean ra) k = new
+    | compareMeans (traceShow (map getMean new) (map getMean new)) (traceShow (map getMean ra) (map getMean ra)) k = new
     | otherwise = calculate n l new k
   where
-    new = kMeans n l (map getMean ra)
+    new = traceShow (kMeans n l (map getMean ra)) (kMeans n l (map getMean ra))
 
 compareMeans :: [Color] -> [Color] -> Float -> Bool
 compareMeans [] _ _ = True
 compareMeans _ [] _ = True
-compareMeans (x : xs) (y : ys) l = compareMeans xs ys l && distance x y < l
+compareMeans (x : xs) (y : ys) l = compareMeans xs ys l && distance x y <= l
 
-run :: Int -> Float -> [String] -> [[Color]] -> [[Color]]
-run n c x l = tryRun n c l $ parseFile x
+generateRandArrs :: Int -> [Color] -> IO [[Color]]
+generateRandArrs 0 _ = return []
+generateRandArrs x l = randomRIO (0, length l - 1) >>= (\c -> ([l !! c] :) <$> generateRandArrs (x - 1) l)
 
-randomColor :: IO Color
-randomColor = (\c -> randomIO >>= (\g -> Color c g <$> randomIO)) =<< randomIO
+allDiff :: Eq a => [a] -> Bool
+allDiff [] = True
+allDiff (x : xs) = x `notElem` xs && allDiff xs
 
-generateRandArrs :: Int -> IO [[Color]]
-generateRandArrs 0 = return []
-generateRandArrs x = randomColor >>= (\c -> ([c] :) <$> generateRandArrs (x - 1))
+generateArr :: Int -> [Color] -> IO [[Color]]
+generateArr n x = generateRandArrs n x >>= (\c -> if allDiff c then return c else generateArr n x)
 
 main :: IO ()
 main = getArgs >>= printFileContent . optParser defaultOpt
