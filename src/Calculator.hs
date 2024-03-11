@@ -5,10 +5,10 @@
 -- Main
 -}
 
-module Calculator (appendToArr, kMeans, generateArrs, getMean) where
+module Calculator (appendToArr, kMeans, getMean) where
 
 import Colors (Color (Color), colorFrom, distance)
-import Data.List
+import Data.List (elemIndex, genericLength)
 import Data.Word (Word8)
 
 appendAtIdx' :: a -> [[a]] -> Int -> [[a]]
@@ -21,21 +21,17 @@ appendAtIdx _ y Nothing = y
 appendAtIdx x y (Just i) = appendAtIdx' x y i
 
 appendToArr :: [Color] -> Color -> [[Color]] -> [[Color]]
-appendToArr means color cls =
+appendToArr meansl color cls =
     appendAtIdx
         color
         cls
         (elemIndex (foldl1 min m) m)
   where
-    m = map (`distance` color) means
+    m = map (`distance` color) meansl
 
-generateArrs :: Int -> [[Color]]
-generateArrs 0 = []
-generateArrs x = [] : generateArrs (x - 1)
-
-kMeans :: [Color] -> Int -> Float -> [Color] -> [[Color]]
-kMeans [] n _ x = map (\z -> [z]) x
-kMeans (x : xs) n l cls = appendToArr cls x (kMeans xs n l cls)
+kMeans :: Int -> [Color] -> [Color] -> [[Color]]
+kMeans n [] _ =  replicate n []
+kMeans n (x : xs) cls = appendToArr cls x (kMeans n xs cls)
 
 mean :: [Word8] -> Word8
 mean x = sum x `div` genericLength x
@@ -44,5 +40,5 @@ means :: ([Word8], [Word8], [Word8]) -> (Word8, Word8, Word8)
 means (a, b, c) = (mean a, mean b, mean c)
 
 getMean :: [Color] -> Color
-getMean [] = (Color 255 255 255)
+getMean [] = Color 255 255 255
 getMean l = colorFrom $ means $ unzip3 (map (\(Color a b c) -> (a, b, c)) l)
