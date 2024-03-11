@@ -25,7 +25,12 @@ splitIt ((_, c) : xs) = c : splitIt xs
 
 tryRun :: Either String [(Point, Color)] -> [[Color]]
 tryRun (Left _) = []
-tryRun (Right l) = kMeans (splitIt l) 2 0.0 [Color 1 2 3, Color 3 2 1]
+tryRun (Right l) = calculate 2 (splitIt l) [[Color 2 3 4], [Color 1 4 5]]
+
+calculate :: Int -> [Color] -> [[Color]] -> [[Color]]
+calculate 0 _ r = r
+calculate _ [] _ = []
+calculate n l r = calculate (n - 1) l (kMeans l 2 0.0 (map getMean r))
 
 run :: [String] -> [[Color]]
 run = tryRun . parseFile
