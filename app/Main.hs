@@ -15,7 +15,8 @@ import Options (Opt (..), defaultOpt, optParser)
 import System.Exit (ExitCode (ExitFailure), exitWith)
 
 printFileContent :: Maybe Opt -> IO ()
-printFileContent (Just (Opt r (Just _) (Just _))) = openFile r >>= checkData . parseFile >>= dumpData
+printFileContent (Just (Opt r (Just _) (Just _))) =
+    openFile r >>= checkData . parseFile >>= dumpData
 printFileContent _ = exitWith $ ExitFailure 84
 
 checkData :: Either String [Data] -> IO ([Data])
