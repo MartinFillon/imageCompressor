@@ -11,9 +11,8 @@ import Data.Functor ((<&>))
 import Data.Word (Word8)
 import Text.Read (readEither)
 
-import Colors (Color, colorFrom)
+import Data (Data, dataFrom)
 import Lib (pError)
-import Points (Point, pointFrom)
 
 openFile :: Maybe String -> IO [String]
 openFile Nothing = pError "File not specified" >> return []
@@ -22,13 +21,17 @@ openFile (Just p) = readFile p <&> lines
 splitAtFirst :: Eq a => a -> [a] -> ([a], [a])
 splitAtFirst x = fmap (drop 1) . break (x ==)
 
-parseFile :: [String] -> Either String [(Point, Color)]
+parseFile :: [String] -> Either String [Data]
 parseFile = mapM (unwrapLine . parseLine . splitAtFirst ' ')
 
-unwrapLine :: (Either String (Int, Int), Either String (Word8, Word8, Word8)) -> Either String (Point, Color)
+unwrapLine ::
+    (Either String (Int, Int), Either String (Word8, Word8, Word8)) ->
+    Either String (Data)
 unwrapLine (Left a, _) = Left a
 unwrapLine (_, Left b) = Left b
-unwrapLine (Right a, Right b) = Right (pointFrom a, colorFrom b)
+unwrapLine (Right a, Right b) = Right (dataFrom b a)
 
-parseLine :: (String, String) -> (Either String (Int, Int), Either String (Word8, Word8, Word8))
+parseLine ::
+    (String, String) ->
+    (Either String (Int, Int), Either String (Word8, Word8, Word8))
 parseLine (a, b) = (readEither a, readEither b)

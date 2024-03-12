@@ -9,59 +9,52 @@ module Main (main) where
 
 import System.Environment (getArgs)
 
-import Calculator (getMean, kMeans)
-import Colors (Color (Color, g), distance)
-import Debug.Trace (traceShow)
+import Data (Data, dumpData)
 import File (openFile, parseFile)
 import Options (Opt (..), defaultOpt, optParser)
-import Points (Point)
 import System.Exit (ExitCode (ExitFailure), exitWith)
-import System.Random (randomIO, randomRIO)
 
 printFileContent :: Maybe Opt -> IO ()
-printFileContent (Just (Opt r (Just n) (Just c))) = do
-    file <- openFile r
-    let f = parseFile file
-    fl <- check f
-    arrs <- generateArr n (splitIt fl)
-    print (map getMean arrs)
-    print $ tryRun n c arrs (splitIt fl)
-    return ()
+printFileContent (Just (Opt r (Just _) (Just _))) = openFile r >>= checkData . parseFile >>= dumpData
 printFileContent _ = exitWith $ ExitFailure 84
 
-splitIt :: [(Point, Color)] -> [Color]
-splitIt [] = []
-splitIt ((_, c) : xs) = c : splitIt xs
+checkData :: Either String [Data] -> IO ([Data])
+checkData (Left _) = (exitWith $ ExitFailure 84) >> return []
+checkData (Right d) = return d
 
-check :: Either String a -> IO a
-check (Left _) = exitWith $ ExitFailure 84
-check (Right a) = return a
+-- splitIt :: [(Point, Color)] -> [Color]
+-- splitIt [] = []
+-- splitIt ((_, c) : xs) = c : splitIt xs
 
-tryRun :: Int -> Float -> [[Color]] -> [Color] -> [[Color]]
-tryRun n k st l = calculate n l st k
+-- check :: Either String a -> IO a
+-- check (Left _) = exitWith $ ExitFailure 84
+-- check (Right a) = return a
 
-calculate :: Int -> [Color] -> [[Color]] -> Float -> [[Color]]
-calculate n l ra k
-    | compareMeans (traceShow (map getMean new) (map getMean new)) (traceShow (map getMean ra) (map getMean ra)) k = new
-    | otherwise = calculate n l new k
-  where
-    new = traceShow (kMeans n l (map getMean ra)) (kMeans n l (map getMean ra))
+-- tryRun :: Int -> Float -> [[Color]] -> [Color] -> [[Color]]
+-- tryRun n k st l = calculate n l st k
 
-compareMeans :: [Color] -> [Color] -> Float -> Bool
-compareMeans [] _ _ = True
-compareMeans _ [] _ = True
-compareMeans (x : xs) (y : ys) l = compareMeans xs ys l && distance x y <= l
+-- calculate :: Int -> [Color] -> [[Color]] -> Float -> [[Color]]
+-- calculate n l ra k
+--     | compareMeans (traceShow (map getMean new) (map getMean new)) (traceShow (map getMean ra) (map getMean ra)) k = new
+--     | otherwise = calculate n l new k
+--   where
+--     new = traceShow (kMeans n l (map getMean ra)) (kMeans n l (map getMean ra))
 
-generateRandArrs :: Int -> [Color] -> IO [[Color]]
-generateRandArrs 0 _ = return []
-generateRandArrs x l = randomRIO (0, length l - 1) >>= (\c -> ([l !! c] :) <$> generateRandArrs (x - 1) l)
+-- compareMeans :: [Color] -> [Color] -> Float -> Bool
+-- compareMeans [] _ _ = True
+-- compareMeans _ [] _ = True
+-- compareMeans (x : xs) (y : ys) l = compareMeans xs ys l && distance x y <= l
 
-allDiff :: Eq a => [a] -> Bool
-allDiff [] = True
-allDiff (x : xs) = x `notElem` xs && allDiff xs
+-- generateRandArrs :: Int -> [Color] -> IO [[Color]]
+-- generateRandArrs 0 _ = return []
+-- generateRandArrs x l = randomRIO (0, length l - 1) >>= (\c -> ([l !! c] :) <$> generateRandArrs (x - 1) l)
 
-generateArr :: Int -> [Color] -> IO [[Color]]
-generateArr n x = generateRandArrs n x >>= (\c -> if allDiff c then return c else generateArr n x)
+-- allDiff :: Eq a => [a] -> Bool
+-- allDiff [] = True
+-- allDiff (x : xs) = x `notElem` xs && allDiff xs
+
+-- generateArr :: Int -> [Color] -> IO [[Color]]
+-- generateArr n x = generateRandArrs n x >>= (\c -> if allDiff c then return c else generateArr n x)
 
 main :: IO ()
 main = getArgs >>= printFileContent . optParser defaultOpt
