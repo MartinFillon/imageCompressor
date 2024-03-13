@@ -5,7 +5,7 @@
 -- Main
 -}
 
-module Calculator (appendToArr, kMeans, getMean) where
+module Calculator (appendToArr, getMean) where
 
 import Colors (Color (Color), colorFrom, distance)
 import Data.List (elemIndex, genericLength)
@@ -30,9 +30,9 @@ appendToArr meansl color cls =
   where
     m = map (`distance` color) meansl
 
-kMeans :: Int -> [Color] -> [Color] -> [[Color]]
-kMeans _ [] x = map (: []) x
-kMeans n (x : xs) cls = appendToArr cls x (kMeans n xs cls)
+-- kMeans :: Int -> [Color] -> [Color] -> [[Color]]
+-- kMeans _ [] x = map (: []) x
+-- kMeans n (x : xs) cls = appendToArr cls x (kMeans n xs cls)
 
 mean :: [Word8] -> Word8
 mean [] = 0
