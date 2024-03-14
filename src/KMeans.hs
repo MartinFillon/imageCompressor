@@ -7,7 +7,6 @@
 
 module KMeans where
 
-import Calculator
 import ImageData
 import Data.List (elemIndex, genericLength)
 import Data.Word (Word8)
@@ -15,48 +14,53 @@ import Data.Word (Word8)
 distance :: (Word8, Word8, Word8) -> (Word8, Word8, Word8) -> Double
 distance (r1, g1, b1) (r2, g2, b2) = sqrt $ fromIntegral $ (r1 - r2)^2 + (g1 - g2)^2 + (b1 - b2)^2
 
-appendAtIdx' :: a -> [[a]] -> Int -> [[a]]
-appendAtIdx' _ [] _ = []
-appendAtIdx' c (x : xs) 0 = (c : x) : xs
-appendAtIdx' c (x : xs) i = x : appendAtIdx' c xs (i - 1)
+updateCentroids :: [[ImageData]] -> [ImageData] -> [ImageData]
+updateCentroids clusters centroids =
+    let newCentroids = map (calculateCentroid . map point) clusters
+    in zipWith (\(ImageData c p _) newC -> ImageData c p newC) centroids newCentroids
 
-appendAtIdx :: a -> [[a]] -> Maybe Int -> [[a]]
-appendAtIdx _ y Nothing = y
-appendAtIdx x y (Just i) = appendAtIdx' x y i
+calculateCentroid :: [(Int, Int)] -> (Int, Int)
+calculateCentroid points =
+    let (xs, ys) = unzip points
+    in (sum xs `div` length points, sum ys `div` length points)
 
-appendToArrII :: [ImageData] -> ImageData -> [[ImageData]] -> [[ImageData]]
-appendToArrII meansl imgData cls =
-    appendAtIdx
-        imgData
-        cls
-        (elemIndex (foldl1 minDist m) m)
-  where
-    minDist = map (`distance` color imgData) meansl
-    m = map (`distance` imgData) meansl
+assignClusters :: [ImageData] -> [ImageData] -> [[ImageData]]
+assignClusters centroids points =
+    let nearestCentroid point = minimumBy (compare `on` distance (point.point)) centroids
+    in groupBy (centroid . nearestCentroid) points
+    where
+        groupBy :: Eq b => (a -> b) -> [a] -> [[a]]
+        groupBy f [] = []
+        groupBy f (x:xs) = let (matches, rest) = span ((==) (f x) . f) xs
+                           in (x:matches) : groupBy f rest
 
-kMeans :: Int -> [ImageData] -> [ImageData] -> ([[ImageData]], [ImageData])
-kMeans _ [] centroids = ([], centroids)
-kMeans n (x : xs) centroids = (newCls : otherCls, newCentroid : otherCentroids)
-  where
-    (newCls, newCentroid) = appendToArrII centroids x (kMeans n xs centroids)
-    (otherCls, otherCentroids) = kMeans n xs centroids
+kMeans :: Int -> [ImageData] -> [ImageData]
+kMeans k points = kMeans' (initializeCentroids k points) points
+    where
+        initializeCentroids k' points' = take k' points'
+        kMeans' centroids points' =
+            let clusters = assignClusters centroids points'
+                newCentroids = updateCentroids clusters centroids
+            in if newCentroids == centroids
+                then newCentroids
+                else kMeans' newCentroids points'
 
-calculateCentroid :: [ImageData] -> Int -> ImageData
-calculateCentroid cluster centroidIndex = ImageData meanColor meanPoint centroidIndex
-  where
-    meanColor = calculateMeanColor cluster
-    meanPoint = calculateMeanPoint cluster
-
-calculateMeanColor :: [ImageData] -> (Word8, Word8, Word8)
-calculateMeanColor cluster = means $ unzip3 [(r, g, b) | ImageData (r, g, b) _ _ <- cluster]
-
-calculateMeanPoint :: [ImageData] -> (Int, Int)
-calculateMeanPoint cluster = (mean xs, mean ys)
-  where
-    (xs, ys) = unzip [point imgData | imgData <- cluster]
-    mean values = round $ fromIntegral (sum values) / fromIntegral (length values)
-
-extractClusters :: [ImageData] -> [[ImageData]]
-extractClusters imgDataList = groupBy (\a b -> centroid a == centroid b) sortedImgData
-  where
-    sortedImgData = sortOn centroid imgDataList
+main :: IO ()
+main = do
+    let points = [ imageDataFrom (0, 0, 0) (1, 2),
+                   imageDataFrom (0, 0, 0) (2, 3),
+                   imageDataFrom (0, 0, 0) (8, 7),
+                   imageDataFrom (33,18,109) (0,0),
+                   imageDataFrom (33,18,109) (0,1),
+                   imageDataFrom (33,21,109) (0,2),
+                   imageDataFrom (33,21,112) (0,3),
+                   imageDataFrom (33,25,112) (0,4),
+                   imageDataFrom (33,32,112) (0,5),
+                   imageDataFrom (33,18,109) (1,0),
+                   imageDataFrom (35,18,109) (1,1),
+                   imageDataFrom (35,21,109) (1,2),
+                   imageDataFrom (38,21,112) (1,3)
+                 ]
+        k = 2
+        centroids = kMeans k points
+        clusteredPoints = assignClusters centroids points
