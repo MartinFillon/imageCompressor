@@ -7,9 +7,10 @@
 
 module KMeans where
 
-import ImageData
-import Data.List (elemIndex, genericLength)
+import ImageData (ImageData (ImageData), imageDataFrom, dumpImageData)
+import Data.List (elemIndex, genericLength, minimumBy)
 import Data.Word (Word8)
+import Data.Function (on)
 
 distance :: (Word8, Word8, Word8) -> (Word8, Word8, Word8) -> Double
 distance (r1, g1, b1) (r2, g2, b2) = sqrt $ fromIntegral $ (r1 - r2)^2 + (g1 - g2)^2 + (b1 - b2)^2
@@ -24,15 +25,15 @@ calculateCentroid points =
     let (xs, ys) = unzip points
     in (sum xs `div` length points, sum ys `div` length points)
 
+groupBy :: Eq b => (a -> b) -> [a] -> [[a]]
+        groupBy f [] = []
+        groupBy f (x:xs) = let (matches, rest) = span ((==) (f x) . f) xs
+                           in (x:matches) : groupBy f rest
+
 assignClusters :: [ImageData] -> [ImageData] -> [[ImageData]]
 assignClusters centroids points =
     let nearestCentroid point = minimumBy (compare `on` distance (point.point)) centroids
     in groupBy (centroid . nearestCentroid) points
-    where
-        groupBy :: Eq b => (a -> b) -> [a] -> [[a]]
-        groupBy f [] = []
-        groupBy f (x:xs) = let (matches, rest) = span ((==) (f x) . f) xs
-                           in (x:matches) : groupBy f rest
 
 kMeans :: Int -> [ImageData] -> [ImageData]
 kMeans k points = kMeans' (initializeCentroids k points) points
@@ -47,10 +48,7 @@ kMeans k points = kMeans' (initializeCentroids k points) points
 
 main :: IO ()
 main = do
-    let points = [ imageDataFrom (0, 0, 0) (1, 2),
-                   imageDataFrom (0, 0, 0) (2, 3),
-                   imageDataFrom (0, 0, 0) (8, 7),
-                   imageDataFrom (33,18,109) (0,0),
+    let points = [ imageDataFrom (33,18,109) (0,0),
                    imageDataFrom (33,18,109) (0,1),
                    imageDataFrom (33,21,109) (0,2),
                    imageDataFrom (33,21,112) (0,3),
@@ -61,6 +59,8 @@ main = do
                    imageDataFrom (35,21,109) (1,2),
                    imageDataFrom (38,21,112) (1,3)
                  ]
-        k = 2
-        centroids = kMeans k points
-        clusteredPoints = assignClusters centroids points
+    let k = 2
+    let centroids = kMeans k points
+    let clusteredPoints = assignClusters centroids points
+    print centroids
+    dumpImageData clusteredPoints
