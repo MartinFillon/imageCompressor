@@ -7,7 +7,7 @@
 
 module KMeans where
 
-import ImageData (ImageData (ImageData), imageDataFrom, dumpImageData)
+import ImageData
 import Data.List (elemIndex, genericLength, minimumBy)
 import Data.Word (Word8)
 import Data.Function (on)
@@ -15,36 +15,20 @@ import Data.Function (on)
 distance :: (Word8, Word8, Word8) -> (Word8, Word8, Word8) -> Double
 distance (r1, g1, b1) (r2, g2, b2) = sqrt $ fromIntegral $ (r1 - r2)^2 + (g1 - g2)^2 + (b1 - b2)^2
 
-updateCentroids :: [[ImageData]] -> [ImageData] -> [ImageData]
-updateCentroids clusters centroids =
-    let newCentroids = map (calculateCentroid . map point) clusters
-    in zipWith (\(ImageData c p _) newC -> ImageData c p newC) centroids newCentroids
+updateCentroid :: ImageData -> Int -> ImageData
+updateCentroid imgData 0 = imgData
+updateCentroid imgData newCentroid = imgData { centroid = newCentroid }
 
-calculateCentroid :: [(Int, Int)] -> (Int, Int)
-calculateCentroid points =
-    let (xs, ys) = unzip points
-    in (sum xs `div` length points, sum ys `div` length points)
+doKMeans' :: [ImageData] -> Float -> [ImageData]
+doKMeans' imgData convergence = updateCentroid imgData' newCentroid
+  where
+    imgData' = map (\x -> x { centroid = 0 }) imgData
+    newCentroid = map (\x -> x { centroid = 0 }) imgData
 
-groupBy :: Eq b => (a -> b) -> [a] -> [[a]]
-        groupBy f [] = []
-        groupBy f (x:xs) = let (matches, rest) = span ((==) (f x) . f) xs
-                           in (x:matches) : groupBy f rest
-
-assignClusters :: [ImageData] -> [ImageData] -> [[ImageData]]
-assignClusters centroids points =
-    let nearestCentroid point = minimumBy (compare `on` distance (point.point)) centroids
-    in groupBy (centroid . nearestCentroid) points
-
-kMeans :: Int -> [ImageData] -> [ImageData]
-kMeans k points = kMeans' (initializeCentroids k points) points
-    where
-        initializeCentroids k' points' = take k' points'
-        kMeans' centroids points' =
-            let clusters = assignClusters centroids points'
-                newCentroids = updateCentroids clusters centroids
-            in if newCentroids == centroids
-                then newCentroids
-                else kMeans' newCentroids points'
+doKMeans :: [ImageData] -> Float -> Int -> [ImageData]
+doKMeans imgData convergence 0 = imgData
+doKMeans imgData convergence nClusters =
+  doKMeans (doKMeans' imgData convergence) convergence (nClusters - 1)
 
 main :: IO ()
 main = do
@@ -59,8 +43,6 @@ main = do
                    imageDataFrom (35,21,109) (1,2),
                    imageDataFrom (38,21,112) (1,3)
                  ]
-    let k = 2
-    let centroids = kMeans k points
-    let clusteredPoints = assignClusters centroids points
-    print centroids
+    -- let centroids = kMeans 2 points
+    let clusteredPoints = doKMeans points (0.8) 2
     dumpImageData clusteredPoints

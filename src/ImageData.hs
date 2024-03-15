@@ -5,7 +5,8 @@
 -- Data
 -}
 
-module ImageData (ImageData (ImageData), imageDataFrom, dumpImageData) where
+module ImageData (ImageData (color, point, centroid),
+  imageDataFrom, dumpImageData) where
 
 import Data.Word (Word8)
 
