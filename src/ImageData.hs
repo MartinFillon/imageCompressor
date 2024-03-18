@@ -25,4 +25,4 @@ instance Show ImageData where
 
 dumpImageData :: [ImageData] -> IO ()
 dumpImageData [] = return ()
-dumpImageData (x : xs) = print x >> dumpImageData xs
+dumpImageData (x : xs) = print x >> print (centroid x) >> dumpImageData xs
