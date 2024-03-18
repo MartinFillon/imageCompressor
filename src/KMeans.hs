@@ -8,41 +8,31 @@
 module KMeans where
 
 import ImageData
-import Data.List (elemIndex, genericLength, minimumBy)
+
+import Data.List (minimumBy)
 import Data.Word (Word8)
 import Data.Function (on)
 
 distance :: (Word8, Word8, Word8) -> (Word8, Word8, Word8) -> Double
-distance (r1, g1, b1) (r2, g2, b2) = sqrt $ fromIntegral $ (r1 - r2)^2 + (g1 - g2)^2 + (b1 - b2)^2
+distance (r1, g1, b1) (r2, g2, b2) =
+  sqrt $ fromIntegral $ (r1 - r2)^2 + (g1 - g2)^2 + (b1 - b2)^2
 
 updateCentroid :: ImageData -> Int -> ImageData
 updateCentroid imgData 0 = imgData
 updateCentroid imgData newCentroid = imgData { centroid = newCentroid }
 
-doKMeans' :: [ImageData] -> Float -> [ImageData]
-doKMeans' imgData convergence = map (\img -> updateCentroid img $ nearestCentroid img) imgData
+doKMeans' :: [ImageData] -> Float -> Int -> [ImageData]
+doKMeans' imgData convergence nClusters = map (\img ->
+    updateCentroid img $ nearestCentroid img) imgData
   where
-    nearestCentroid img = fst $ minimumBy (compare `on` snd) [(i, distance (color img) (color c)) | (i, c) <- centroids]
-    centroids = zip [0..] imgData
+    centroids = take nClusters $ zip [1..] imgData
+    nearestCentroid img =
+      fst $ minimumBy (compare `on` snd) [(i, distance (color img) (color c)) |
+        (i, c) <- centroids]
 
 doKMeans :: [ImageData] -> Float -> Int -> [ImageData]
-doKMeans imgData convergence 0 = imgData
 doKMeans imgData convergence nClusters =
-  doKMeans (doKMeans' imgData convergence) convergence (nClusters - 1)
-
--- main :: IO ()
--- main = do
---     let points = [ imageDataFrom (33,18,109) (0,0),
---                    imageDataFrom (33,18,109) (0,1),
---                    imageDataFrom (33,21,109) (0,2),
---                    imageDataFrom (33,21,112) (0,3),
---                    imageDataFrom (33,25,112) (0,4),
---                    imageDataFrom (33,32,112) (0,5),
---                    imageDataFrom (33,18,109) (1,0),
---                    imageDataFrom (35,18,109) (1,1),
---                    imageDataFrom (35,21,109) (1,2),
---                    imageDataFrom (38,21,112) (1,3)
---                  ]
---     -- let centroids = kMeans 2 points
---     let clusteredPoints = doKMeans points (0.8) 2
---     dumpImageData clusteredPoints
+    doKMeans' imgData' convergence nClusters
+  where
+    imgData' = zipWith (\img idx -> img { centroid = idx }) imgData clusterInd
+    clusterInd = take (length imgData) $ cycle [1..nClusters]
