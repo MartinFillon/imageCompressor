@@ -20,29 +20,29 @@ updateCentroid imgData 0 = imgData
 updateCentroid imgData newCentroid = imgData { centroid = newCentroid }
 
 doKMeans' :: [ImageData] -> Float -> [ImageData]
-doKMeans' imgData convergence = updateCentroid imgData' newCentroid
+doKMeans' imgData convergence = map (\img -> updateCentroid img $ nearestCentroid img) imgData
   where
-    imgData' = map (\x -> x { centroid = 0 }) imgData
-    newCentroid = map (\x -> x { centroid = 0 }) imgData
+    nearestCentroid img = fst $ minimumBy (compare `on` snd) [(i, distance (color img) (color c)) | (i, c) <- centroids]
+    centroids = zip [0..] imgData
 
 doKMeans :: [ImageData] -> Float -> Int -> [ImageData]
 doKMeans imgData convergence 0 = imgData
 doKMeans imgData convergence nClusters =
   doKMeans (doKMeans' imgData convergence) convergence (nClusters - 1)
 
-main :: IO ()
-main = do
-    let points = [ imageDataFrom (33,18,109) (0,0),
-                   imageDataFrom (33,18,109) (0,1),
-                   imageDataFrom (33,21,109) (0,2),
-                   imageDataFrom (33,21,112) (0,3),
-                   imageDataFrom (33,25,112) (0,4),
-                   imageDataFrom (33,32,112) (0,5),
-                   imageDataFrom (33,18,109) (1,0),
-                   imageDataFrom (35,18,109) (1,1),
-                   imageDataFrom (35,21,109) (1,2),
-                   imageDataFrom (38,21,112) (1,3)
-                 ]
-    -- let centroids = kMeans 2 points
-    let clusteredPoints = doKMeans points (0.8) 2
-    dumpImageData clusteredPoints
+-- main :: IO ()
+-- main = do
+--     let points = [ imageDataFrom (33,18,109) (0,0),
+--                    imageDataFrom (33,18,109) (0,1),
+--                    imageDataFrom (33,21,109) (0,2),
+--                    imageDataFrom (33,21,112) (0,3),
+--                    imageDataFrom (33,25,112) (0,4),
+--                    imageDataFrom (33,32,112) (0,5),
+--                    imageDataFrom (33,18,109) (1,0),
+--                    imageDataFrom (35,18,109) (1,1),
+--                    imageDataFrom (35,21,109) (1,2),
+--                    imageDataFrom (38,21,112) (1,3)
+--                  ]
+--     -- let centroids = kMeans 2 points
+--     let clusteredPoints = doKMeans points (0.8) 2
+--     dumpImageData clusteredPoints
