@@ -30,9 +30,9 @@ appendToArr meansl color cls =
   where
     m = map (`distance` color) meansl
 
-kMeans :: Int -> [Color] -> [Color] -> [[Color]]
-kMeans _ [] x = map (: []) x
-kMeans n (x : xs) cls = appendToArr cls x (kMeans n xs cls)
+oldKMeans :: Int -> [Color] -> [Color] -> [[Color]]
+oldKMeans _ [] x = map (: []) x
+oldKMeans n (x : xs) cls = appendToArr cls x (oldKMeans n xs cls)
 
 mean :: [Word8] -> Word8
 mean [] = 0

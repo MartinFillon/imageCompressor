@@ -5,7 +5,7 @@
 -- Main
 -}
 
-module Colors (Color (..), colorFrom, distance) where
+module Colors (Color (..), colorFrom, distance, printColor) where
 
 import Data.Word (Word8)
 
@@ -18,6 +18,11 @@ data Color = Color
 
 colorFrom :: (Word8, Word8, Word8) -> Color
 colorFrom (red, green, blue) = Color red green blue
+
+printColor :: Color -> IO ()
+printColor (Color 255 255 255) = return ()
+printColor (Color r g b) = putStrLn $ "(" ++ show r ++ ", " ++
+  show g ++ ", " ++ show b ++ ")"
 
 instance Read Color where
     readsPrec _ str =
