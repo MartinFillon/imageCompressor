@@ -10,7 +10,8 @@ module Main (main) where
 import System.Environment (getArgs)
 
 import File (openFile, parseFile)
-import ImageData (ImageData, dumpImageData)
+import ImageData (ImageData (centroid), dumpImageData)
+import Colors (Color, printColor)
 import Options (Opt (..), defaultOpt, optParser)
 import System.Exit (ExitCode (ExitFailure), exitWith)
 
