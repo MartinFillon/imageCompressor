@@ -5,17 +5,14 @@
 -- KMeans
 -}
 
-module KMeans where
+module KMeans (doKMeans) where
 
-import ImageData
+import ImageData (ImageData (color, point, centroid))
+import Colors (Color (..), colorFrom, distance)
 
-import Data.List (minimumBy)
 import Data.Word (Word8)
+import Data.List (minimumBy)
 import Data.Function (on)
-
-distance :: (Word8, Word8, Word8) -> (Word8, Word8, Word8) -> Double
-distance (r1, g1, b1) (r2, g2, b2) =
-  sqrt $ fromIntegral $ (r1 - r2)^2 + (g1 - g2)^2 + (b1 - b2)^2
 
 updateCentroid :: ImageData -> Int -> ImageData
 updateCentroid imgData 0 = imgData
@@ -27,8 +24,8 @@ doKMeans' imgData convergence nClusters = map (\img ->
   where
     centroids = take nClusters $ zip [1..] imgData
     nearestCentroid img =
-      fst $ minimumBy (compare `on` snd) [(i, distance (color img) (color c)) |
-        (i, c) <- centroids]
+      fst $ minimumBy (compare `on` snd) [(i, distance (colorFrom (color img))
+        (colorFrom (color c))) | (i, c) <- centroids]
 
 doKMeans :: [ImageData] -> Float -> Int -> [ImageData]
 doKMeans imgData convergence nClusters =
