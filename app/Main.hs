@@ -14,10 +14,13 @@ import ImageData (ImageData (centroid), dumpImageData)
 import Colors (Color, printColor)
 import Options (Opt (..), defaultOpt, optParser)
 import System.Exit (ExitCode (ExitFailure), exitWith)
+import KMeans (doKMeans)
+import Clusters (computeClusterMeans)
 
 printFileContent :: Maybe Opt -> IO ()
-printFileContent (Just (Opt r (Just _) (Just _))) =
-    openFile r >>= checkImageData . parseFile >>= dumpImageData
+printFileContent (Just (Opt r (Just c) (Just l))) = do
+  a <- openFile r >>= checkImageData . parseFile
+  printResult (doKMeans a l c) (computeClusterMeans (doKMeans a l c) c) c
 printFileContent _ = exitWith $ ExitFailure 84
 
 printResult :: [ImageData] -> [(Int, Color)] -> Int -> IO ()
