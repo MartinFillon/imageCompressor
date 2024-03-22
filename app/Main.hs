@@ -26,12 +26,13 @@ calcKmeans ::
     Int ->
     Bool ->
     ([ImageData], [(Int, Color)])
-calcKmeans dt st _ n True = (dt, zip [1 ..] $ init)
+calcKmeans dt st _ n True = (dt, end)
+  where
+    end = zip [1 ..] $ map colorFrom $ computeClusterMeans n st dt
 calcKmeans dt st c n False = calcKmeans ndata mn c n conv
   where
     ndata = doKMeans dt st n
     mn = computeClusterMeans n st ndata
-    init = map colorFrom $ computeClusterMeans n st dt
     conv = (checkConvergence c $ zip st mn)
 
 startingClusters :: Int -> [ImageData] -> IO [ImageData]
