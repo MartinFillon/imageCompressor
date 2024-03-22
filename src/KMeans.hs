@@ -18,10 +18,7 @@ updateCentroid :: ImageData -> Int -> ImageData
 updateCentroid imgData newCentroid = imgData {centroid = newCentroid}
 
 doKMeans' :: [ImageData] -> [(Int, Int, Int)] -> Int -> [ImageData]
-doKMeans' imgData means _ =
-    map
-        (\img -> updateCentroid img $ nearestCentroid img)
-        imgData
+doKMeans' d means _ = map (\img -> updateCentroid img $ nearestCentroid img) d
   where
     centroids = zip [1 ..] means
     nearestCentroid img =

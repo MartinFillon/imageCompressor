@@ -21,7 +21,9 @@ data ImageData = ImageData
     deriving (Eq)
 
 imageDataFrom :: (Word8, Word8, Word8) -> (Int, Int) -> ImageData
-imageDataFrom (a, b, c) pt = ImageData (fromIntegral a, fromIntegral b, fromIntegral c) pt 0
+imageDataFrom (a, b, c) pt = ImageData convert pt 0
+  where
+    convert = (fromIntegral a, fromIntegral b, fromIntegral c)
 
 instance Show ImageData where
     show (ImageData c p d) = show p ++ " " ++ show c ++ " " ++ show d
