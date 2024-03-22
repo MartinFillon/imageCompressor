@@ -7,29 +7,28 @@
 
 module KMeans (doKMeans) where
 
-import ImageData (ImageData (color, point, centroid))
-import Colors (Color (..), colorFrom, distance)
+import Colors (colorFrom, distance)
+import ImageData (ImageData (centroid, color))
 
-import Data.Word (Word8)
-import Data.List (minimumBy)
 import Data.Function (on)
+import Data.List (minimumBy)
+import Debug.Trace (traceShowId)
 
 updateCentroid :: ImageData -> Int -> ImageData
-updateCentroid imgData 0 = imgData
-updateCentroid imgData newCentroid = imgData { centroid = newCentroid }
+updateCentroid imgData newCentroid = imgData {centroid = newCentroid}
 
-doKMeans' :: [ImageData] -> Float -> Int -> [ImageData]
-doKMeans' imgData convergence nClusters = map (\img ->
-    updateCentroid img $ nearestCentroid img) imgData
+doKMeans' :: [ImageData] -> [(Int, Int, Int)] -> Int -> [ImageData]
+doKMeans' imgData means _ =
+    map
+        (\img -> updateCentroid img $ nearestCentroid img)
+        imgData
   where
-    centroids = take nClusters $ zip [1..] imgData
+    centroids = zip [1 ..] means
     nearestCentroid img =
-      fst $ minimumBy (compare `on` snd) [(i, distance (colorFrom (color img))
-        (colorFrom (color c))) | (i, c) <- centroids]
+        fst $
+            minimumBy
+                (compare `on` snd)
+                [(i, distance (color img) c) | (i, c) <- centroids]
 
-doKMeans :: [ImageData] -> Float -> Int -> [ImageData]
-doKMeans imgData convergence nClusters =
-    doKMeans' imgData' convergence nClusters
-  where
-    imgData' = zipWith (\img idx -> img { centroid = idx }) imgData clusterInd
-    clusterInd = take (length imgData) $ cycle [1..nClusters]
+doKMeans :: [ImageData] -> [(Int, Int, Int)] -> Int -> [ImageData]
+doKMeans = doKMeans'
