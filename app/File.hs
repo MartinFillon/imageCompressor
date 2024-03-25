@@ -21,7 +21,8 @@ openFile (Just p) =
     catch
         (readFile p)
         ( \e ->
-            pError ("Couldn't open " ++ p ++ ": " ++ show (e :: IOException)) >> return []
+            pError ("Couldn't open " ++ p ++ ": " ++ show (e :: IOException))
+                >> return []
         )
         <&> lines
 
