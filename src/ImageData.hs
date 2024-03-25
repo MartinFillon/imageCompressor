@@ -26,7 +26,7 @@ imageDataFrom (a, b, c) pt = ImageData convert pt 0
     convert = (fromIntegral a, fromIntegral b, fromIntegral c)
 
 instance Show ImageData where
-    show (ImageData c p d) = show p ++ " " ++ show c ++ " " ++ show d
+    show (ImageData c p _) = show p ++ " " ++ show c
 
 dumpImageData :: [ImageData] -> IO ()
 dumpImageData = foldr ((>>) . print) (return ())

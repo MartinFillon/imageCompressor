@@ -32,8 +32,8 @@ calcKmeans dt st _ n True = (dt, end)
 calcKmeans dt st c n False = calcKmeans ndata mn c n conv
   where
     ndata = doKMeans dt st n
-    mn = computeClusterMeans n st ndata
-    conv = (checkConvergence c $ zip st mn)
+    mn = computeClusterMeans 1 st ndata
+    conv = checkConvergence c $ zip (traceShowId st) mn
 
 startingClusters :: Int -> [ImageData] -> IO [ImageData]
 startingClusters 0 _ = return []
@@ -45,9 +45,10 @@ prepareStart :: [ImageData] -> IO [(Int, Int, Int)]
 prepareStart x = return (map color x)
 
 printFileContent :: Maybe Opt -> IO ()
-printFileContent (Just (Opt r (Just c) (Just l))) = do
+printFileContent (Just (Opt r (Just c) (Just l))) | c > 0 && l > 0 = do
     a <- openFile r >>= checkImageData . parseFile
     st <- startingClusters c a >>= prepareStart
+    print st
     printResult c $ calcKmeans a st l c False
 printFileContent _ = exitWith $ ExitFailure 84
 

@@ -7,8 +7,6 @@
 
 module Colors (Color (..), colorFrom, distance, printColor) where
 
-import Data.Word (Word8)
-
 data Color = Color
     { r :: Int,
       g :: Int,
@@ -30,11 +28,6 @@ printColor (Color r g b) =
             ++ ", "
             ++ show b
             ++ ")"
-
--- instance Read Color where
---     readsPrec _ str =
---         (\(red, green, blue) -> [(colorFrom (red, green, blue), "")])
---             (read str :: (Word8, Word8, Word8))
 
 distance' :: Int -> Int -> Float
 distance' x y = fromIntegral ((x - y) ^ 2) :: Float
