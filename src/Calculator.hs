@@ -9,7 +9,6 @@ module Calculator (getMean) where
 
 import Colors (Color (Color))
 import Data.List (genericLength)
-import Data.Word (Word8)
 
 mean :: [Int] -> Int
 mean [] = 0

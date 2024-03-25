@@ -7,6 +7,7 @@
 
 module File (openFile, parseFile) where
 
+import Control.Exception (IOException, catch)
 import Data.Functor ((<&>))
 import Data.Word (Word8)
 import Text.Read (readEither)
@@ -16,7 +17,13 @@ import Lib (pError)
 
 openFile :: Maybe String -> IO [String]
 openFile Nothing = pError "File not specified" >> return []
-openFile (Just p) = readFile p <&> lines
+openFile (Just p) =
+    catch
+        (readFile p)
+        ( \e ->
+            pError ("Couldn't open " ++ p ++ ": " ++ show (e :: IOException)) >> return []
+        )
+        <&> lines
 
 splitAtFirst :: Eq a => a -> [a] -> ([a], [a])
 splitAtFirst x = fmap (drop 1) . break (x ==)
@@ -26,7 +33,7 @@ parseFile = mapM (unwrapLine . parseLine . splitAtFirst ' ')
 
 unwrapLine ::
     (Either String (Int, Int), Either String (Word8, Word8, Word8)) ->
-    Either String (ImageData)
+    Either String ImageData
 unwrapLine (Left a, _) = Left a
 unwrapLine (_, Left b) = Left b
 unwrapLine (Right a, Right b) = Right (imageDataFrom b a)

@@ -12,7 +12,6 @@ import ImageData (ImageData (centroid, color))
 
 import Data.Function (on)
 import Data.List (minimumBy)
-import Debug.Trace (traceShowId)
 
 updateCentroid :: ImageData -> Int -> ImageData
 updateCentroid imgData newCentroid = imgData {centroid = newCentroid}
