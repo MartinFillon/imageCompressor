@@ -5,22 +5,24 @@
 -- Clusters
 -}
 
-module Clusters (computeClusterMeans) where
+module Clusters (computeClusterMeans, checkConvergence) where
 
-import ImageData (ImageData (color, point, centroid))
-import Colors (Color (..), colorFrom)
 import Calculator (getMean)
+import Colors (colorFrom, distance)
+import ImageData (ImageData (centroid, color))
 
-import Data.Function (on)
-import Data.List (groupBy, sortOn)
+computeClusterMeans ::
+    Int -> [(Int, Int, Int)] -> [ImageData] -> [(Int, Int, Int)]
+computeClusterMeans _ [] _ = []
+computeClusterMeans n (x : xs) imgData =
+    imgMean (filter (\img -> n == centroid img) imgData) x
+        : computeClusterMeans (n + 1) xs imgData
 
-computeClusterMeans :: [ImageData] -> Int -> [(Int, (Color))]
-computeClusterMeans imgData nClusters =
-  map computeMean $ groupBy ((==) `on` centroid) sortedImgData
-  where
-    sortedImgData = sortByCentroid imgData
-    computeMean cluster = (centroid (head cluster), calculateMeanColor cluster)
-    calculateMeanColor cluster = getMean (map (colorFrom . color) cluster)
+checkConvergence ::
+    Float -> [((Int, Int, Int), (Int, Int, Int))] -> Bool
+checkConvergence n =
+    foldr (\(a, b) acc -> acc && distance a b <= n) True
 
-sortByCentroid :: [ImageData] -> [ImageData]
-sortByCentroid = sortOn centroid
+imgMean :: [ImageData] -> (Int, Int, Int) -> (Int, Int, Int)
+imgMean [] x = x
+imgMean x _ = getMean (map (colorFrom . color) x)

@@ -5,24 +5,28 @@
 -- Data
 -}
 
-module ImageData (ImageData (color, point, centroid),
-  imageDataFrom, dumpImageData) where
+module ImageData (
+    ImageData (color, point, centroid),
+    imageDataFrom,
+    dumpImageData,
+) where
 
 import Data.Word (Word8)
 
 data ImageData = ImageData
-    { color :: (Word8, Word8, Word8),
+    { color :: (Int, Int, Int),
       point :: (Int, Int),
       centroid :: Int
     }
     deriving (Eq)
 
 imageDataFrom :: (Word8, Word8, Word8) -> (Int, Int) -> ImageData
-imageDataFrom cl pt = ImageData cl pt 0
+imageDataFrom (a, b, c) pt = ImageData convert pt 0
+  where
+    convert = (fromIntegral a, fromIntegral b, fromIntegral c)
 
 instance Show ImageData where
     show (ImageData c p _) = show p ++ " " ++ show c
 
 dumpImageData :: [ImageData] -> IO ()
-dumpImageData [] = return ()
-dumpImageData (x : xs) = print x >> dumpImageData xs
+dumpImageData = foldr ((>>) . print) (return ())
