@@ -11,7 +11,6 @@ import System.Environment (getArgs)
 
 import Clusters (checkConvergence, computeClusterMeans)
 import Colors (Color (..), colorFrom, printColor)
-import Debug.Trace (traceShowId)
 import File (openFile, parseFile)
 import ImageData (ImageData (centroid, color), dumpImageData)
 import KMeans (doKMeans)
@@ -33,7 +32,7 @@ calcKmeans dt st c n False = calcKmeans ndata mn c n conv
   where
     ndata = doKMeans dt st n
     mn = computeClusterMeans 1 st ndata
-    conv = checkConvergence c $ zip (traceShowId st) mn
+    conv = checkConvergence c $ zip st mn
 
 startingClusters :: Int -> [ImageData] -> IO [ImageData]
 startingClusters 0 _ = return []
@@ -48,7 +47,6 @@ printFileContent :: Maybe Opt -> IO ()
 printFileContent (Just (Opt r (Just c) (Just l))) | c > 0 && l > 0 = do
     a <- openFile r >>= checkImageData . parseFile
     st <- startingClusters c a >>= prepareStart
-    print st
     printResult c $ calcKmeans a st l c False
 printFileContent _ = exitWith $ ExitFailure 84
 
