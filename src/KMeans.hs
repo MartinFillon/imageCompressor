@@ -7,7 +7,7 @@
 
 module KMeans (doKMeans) where
 
-import Colors (colorFrom, distance)
+import Colors (distance)
 import ImageData (ImageData (centroid, color))
 
 import Data.Function (on)

@@ -10,7 +10,6 @@ module Main (main) where
 import System.Environment (getArgs)
 
 import Clusters (checkConvergence, computeClusterMeans)
-import Colors (Color (..), colorFrom, printColor)
 import File (openFile, parseFile)
 import ImageData (ImageData (centroid, color), dumpImageData)
 import KMeans (doKMeans)
@@ -19,19 +18,21 @@ import System.Exit (ExitCode (ExitFailure), exitWith)
 import System.Random (randomRIO)
 
 calcKmeans ::
-    [ImageData] ->
-    [(Int, Int, Int)] ->
+    ( [ImageData],
+      [(Int, Int, Int)]
+    ) ->
     Float ->
     Int ->
     Bool ->
     ([ImageData], [(Int, (Int, Int, Int))])
-calcKmeans dt st _ _ True = (dt, end)
+calcKmeans (dt, st) _ _ True = (dt, end)
   where
     end = zip [1 ..] st
-calcKmeans dt st c n False = calcKmeans new end c n (checkConvergence c (zip st end))
+calcKmeans (dt, st) c n False = calcKmeans (new, end) c n conv
   where
     end = computeClusterMeans 1 st new
     new = doKMeans dt st n
+    conv = checkConvergence c (zip st end)
 
 startingClusters :: Int -> [ImageData] -> IO [ImageData]
 startingClusters 0 _ = return []
@@ -39,14 +40,18 @@ startingClusters n l =
     randomRIO (0, length l - 1)
         >>= (\c -> (l !! c :) <$> startingClusters (n - 1) l)
 
-prepareStart :: [ImageData] -> IO [(Int, Int, Int)]
-prepareStart x = return (map color x)
+prepareStart :: [ImageData] -> [ImageData] -> IO ([ImageData], [(Int, Int, Int)])
+prepareStart y x = return (y, map color x)
+
+getFile :: Maybe String -> IO [ImageData]
+getFile r = openFile r >>= checkImageData . parseFile
 
 printFileContent :: Maybe Opt -> IO ()
-printFileContent (Just (Opt r (Just c) (Just l))) | c > 0 && l > 0 = do
-    a <- openFile r >>= checkImageData . parseFile
-    st <- startingClusters c a >>= prepareStart
-    printResult c $ calcKmeans a st l c False
+printFileContent (Just (Opt r (Just c) (Just l)))
+    | c > 0 && l > 0 =
+        getFile r
+            >>= (\x -> startingClusters c x >>= prepareStart x)
+            >>= (\z -> printResult c $ calcKmeans z l c False)
 printFileContent _ = exitWith $ ExitFailure 84
 
 printResult :: Int -> ([ImageData], [(Int, (Int, Int, Int))]) -> IO ()
@@ -56,9 +61,9 @@ printResult nClusters (imgData, x : xs) =
         >> printResult nClusters (imgData, xs)
 
 printCluster :: (Int, (Int, Int, Int)) -> [ImageData] -> IO ()
-printCluster (mean, color) imgData =
+printCluster (mean, clr) imgData =
     putStrLn "--"
-        >> print color
+        >> print clr
         >> putStrLn "-"
         >> dumpImageData (filter (\img -> mean == centroid img) imgData)
 

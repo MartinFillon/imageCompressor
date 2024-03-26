@@ -7,7 +7,6 @@
 
 module Calculator (getMean) where
 
-import Colors (Color (Color))
 import Data.List (genericLength)
 
 mean :: [Int] -> Int
@@ -17,6 +16,6 @@ mean x = sum x `div` genericLength x
 means :: ([Int], [Int], [Int]) -> (Int, Int, Int)
 means (a, b, c) = (mean a, mean b, mean c)
 
-getMean :: [Color] -> (Int, Int, Int)
+getMean :: [(Int, Int, Int)] -> (Int, Int, Int)
 getMean [] = (255, 255, 255)
-getMean l = means $ unzip3 (map (\(Color a b c) -> (a, b, c)) l)
+getMean l = means $ unzip3 l
