@@ -8,7 +8,7 @@
 module Clusters (computeClusterMeans, checkConvergence) where
 
 import Calculator (getMean)
-import Colors (colorFrom, distance)
+import Colors (distance)
 import ImageData (ImageData (centroid, color))
 
 computeClusterMeans ::
@@ -25,4 +25,4 @@ checkConvergence n =
 
 imgMean :: [ImageData] -> (Int, Int, Int) -> (Int, Int, Int)
 imgMean [] x = x
-imgMean x _ = getMean (map (colorFrom . color) x)
+imgMean x _ = getMean (map color x)
