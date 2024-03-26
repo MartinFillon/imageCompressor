@@ -24,15 +24,14 @@ calcKmeans ::
     Float ->
     Int ->
     Bool ->
-    ([ImageData], [(Int, Color)])
-calcKmeans dt st _ n True = (dt, end)
+    ([ImageData], [(Int, (Int, Int, Int))])
+calcKmeans dt st _ _ True = (dt, end)
   where
-    end = zip [1 ..] $ map colorFrom $ computeClusterMeans n st dt
-calcKmeans dt st c n False = calcKmeans ndata mn c n conv
+    end = zip [1 ..] st
+calcKmeans dt st c n False = calcKmeans new end c n (checkConvergence c (zip st end))
   where
-    ndata = doKMeans dt st n
-    mn = computeClusterMeans 1 st ndata
-    conv = checkConvergence c $ zip st mn
+    end = computeClusterMeans 1 st new
+    new = doKMeans dt st n
 
 startingClusters :: Int -> [ImageData] -> IO [ImageData]
 startingClusters 0 _ = return []
@@ -50,16 +49,16 @@ printFileContent (Just (Opt r (Just c) (Just l))) | c > 0 && l > 0 = do
     printResult c $ calcKmeans a st l c False
 printFileContent _ = exitWith $ ExitFailure 84
 
-printResult :: Int -> ([ImageData], [(Int, Color)]) -> IO ()
+printResult :: Int -> ([ImageData], [(Int, (Int, Int, Int))]) -> IO ()
 printResult _ (_, []) = return ()
 printResult nClusters (imgData, x : xs) =
     printCluster x imgData
         >> printResult nClusters (imgData, xs)
 
-printCluster :: (Int, Color) -> [ImageData] -> IO ()
+printCluster :: (Int, (Int, Int, Int)) -> [ImageData] -> IO ()
 printCluster (mean, color) imgData =
     putStrLn "--"
-        >> printColor color
+        >> print color
         >> putStrLn "-"
         >> dumpImageData (filter (\img -> mean == centroid img) imgData)
 
