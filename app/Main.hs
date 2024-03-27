@@ -10,6 +10,7 @@ module Main (main) where
 import System.Environment (getArgs)
 
 import Clusters (checkConvergence, computeClusterMeans)
+import Data.List (nub)
 import File (openFile, parseFile)
 import ImageData (ImageData (centroid, color), dumpImageData)
 import KMeans (doKMeans)
@@ -40,7 +41,8 @@ startingClusters n l =
     randomRIO (0, length l - 1)
         >>= (\c -> (l !! c :) <$> startingClusters (n - 1) l)
 
-prepareStart :: [ImageData] -> [ImageData] -> IO ([ImageData], [(Int, Int, Int)])
+prepareStart ::
+    [ImageData] -> [ImageData] -> IO ([ImageData], [(Int, Int, Int)])
 prepareStart y x = return (y, map color x)
 
 getFile :: Maybe String -> IO [ImageData]
@@ -50,7 +52,7 @@ printFileContent :: Maybe Opt -> IO ()
 printFileContent (Just (Opt r (Just c) (Just l)))
     | c > 0 && l > 0 =
         getFile r
-            >>= (\x -> startingClusters c x >>= prepareStart x)
+            >>= (\x -> startingClusters c (nub x) >>= prepareStart x)
             >>= (\z -> printResult c $ calcKmeans z l c False)
 printFileContent _ = exitWith $ ExitFailure 84
 
