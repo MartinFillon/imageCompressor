@@ -1,2 +1,13 @@
+{-
+-- EPITECH PROJECT, 2024
+-- image
+-- File description:
+-- Spec
+-}
+
+import Test.Hspec
+import CalculatorSpec
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = hspec $ do
+  describe "Calculator" CalculatorSpec.spec
