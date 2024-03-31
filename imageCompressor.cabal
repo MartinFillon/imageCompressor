@@ -66,6 +66,9 @@ test-suite imageCompressor-test
   main-is: Spec.hs
   other-modules:
       CalculatorSpec
+      ClusterSpec
+      ColorSpec
+      PointsSpec
       Paths_imageCompressor
   autogen-modules:
       Paths_imageCompressor
