@@ -23,6 +23,7 @@ fclean: clean
 re: fclean all
 
 tests_run:
-	stack test
+	stack test --coverage
+	cp $(BIN_PATH)/hpc/ ./test/coverage -r
 
 .PHONY: all fclean re clean $(NAME) tests_run
